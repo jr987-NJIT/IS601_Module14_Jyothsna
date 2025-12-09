@@ -144,12 +144,15 @@ def test_add_calculation_success(page: Page):
     token = login_response.json()["access_token"]
     
     # Navigate to calculations page
-    page.goto(f"{BASE_URL}/static/calculations.html")
+    # Use login page first to set localStorage safely without redirect race condition
+    page.goto(f"{BASE_URL}/static/login.html")
     
     # Set token in localStorage
     page.evaluate(f"localStorage.setItem('token', '{token}')")
     page.evaluate(f"localStorage.setItem('username', '{username}')")
-    page.reload()
+    
+    # Now navigate to calculations page
+    page.goto(f"{BASE_URL}/static/calculations.html")
     
     # Fill in calculation form
     page.fill("#operandA", "10")
@@ -191,10 +194,15 @@ def test_browse_calculations(page: Page):
     requests.post(f"{BASE_URL}/calculations/", json={"a": 20, "b": 4, "type": "Divide"}, headers=headers)
     
     # Navigate to calculations page
-    page.goto(f"{BASE_URL}/static/calculations.html")
+    # Use login page first to set localStorage safely without redirect race condition
+    page.goto(f"{BASE_URL}/static/login.html")
+    
+    # Set token in localStorage
     page.evaluate(f"localStorage.setItem('token', '{token}')")
     page.evaluate(f"localStorage.setItem('username', '{username}')")
-    page.reload()
+    
+    # Now navigate to calculations page
+    page.goto(f"{BASE_URL}/static/calculations.html")
     
     # Wait for table to load
     page.wait_for_timeout(1000)
@@ -230,10 +238,15 @@ def test_read_specific_calculation(page: Page):
     calc_id = calc_response.json()["id"]
     
     # Navigate to calculations page
-    page.goto(f"{BASE_URL}/static/calculations.html")
+    # Use login page first to set localStorage safely without redirect race condition
+    page.goto(f"{BASE_URL}/static/login.html")
+    
+    # Set token in localStorage
     page.evaluate(f"localStorage.setItem('token', '{token}')")
     page.evaluate(f"localStorage.setItem('username', '{username}')")
-    page.reload()
+    
+    # Now navigate to calculations page
+    page.goto(f"{BASE_URL}/static/calculations.html")
     
     # Wait for table to load
     page.wait_for_timeout(1000)
@@ -270,10 +283,15 @@ def test_edit_calculation_success(page: Page):
     requests.post(f"{BASE_URL}/calculations/", json={"a": 10, "b": 2, "type": "Add"}, headers=headers)
     
     # Navigate to calculations page
-    page.goto(f"{BASE_URL}/static/calculations.html")
+    # Use login page first to set localStorage safely without redirect race condition
+    page.goto(f"{BASE_URL}/static/login.html")
+    
+    # Set token in localStorage
     page.evaluate(f"localStorage.setItem('token', '{token}')")
     page.evaluate(f"localStorage.setItem('username', '{username}')")
-    page.reload()
+    
+    # Now navigate to calculations page
+    page.goto(f"{BASE_URL}/static/calculations.html")
     
     # Wait for table to load
     page.wait_for_timeout(1000)
@@ -324,10 +342,15 @@ def test_delete_calculation_success(page: Page):
     requests.post(f"{BASE_URL}/calculations/", json={"a": 30, "b": 6, "type": "Divide"}, headers=headers)
     
     # Navigate to calculations page
-    page.goto(f"{BASE_URL}/static/calculations.html")
+    # Use login page first to set localStorage safely without redirect race condition
+    page.goto(f"{BASE_URL}/static/login.html")
+    
+    # Set token in localStorage
     page.evaluate(f"localStorage.setItem('token', '{token}')")
     page.evaluate(f"localStorage.setItem('username', '{username}')")
-    page.reload()
+    
+    # Now navigate to calculations page
+    page.goto(f"{BASE_URL}/static/calculations.html")
     
     # Wait for table to load
     page.wait_for_timeout(1000)
@@ -370,10 +393,15 @@ def test_add_calculation_division_by_zero(page: Page):
     token = login_response.json()["access_token"]
     
     # Navigate to calculations page
-    page.goto(f"{BASE_URL}/static/calculations.html")
+    # Use login page first to set localStorage safely without redirect race condition
+    page.goto(f"{BASE_URL}/static/login.html")
+    
+    # Set token in localStorage
     page.evaluate(f"localStorage.setItem('token', '{token}')")
     page.evaluate(f"localStorage.setItem('username', '{username}')")
-    page.reload()
+    
+    # Now navigate to calculations page
+    page.goto(f"{BASE_URL}/static/calculations.html")
     
     # Try to create division by zero
     page.fill("#operandA", "10")
@@ -422,10 +450,15 @@ def test_edit_calculation_invalid_data(page: Page):
     requests.post(f"{BASE_URL}/calculations/", json={"a": 10, "b": 2, "type": "Add"}, headers=headers)
     
     # Navigate to calculations page
-    page.goto(f"{BASE_URL}/static/calculations.html")
+    # Use login page first to set localStorage safely without redirect race condition
+    page.goto(f"{BASE_URL}/static/login.html")
+    
+    # Set token in localStorage
     page.evaluate(f"localStorage.setItem('token', '{token}')")
     page.evaluate(f"localStorage.setItem('username', '{username}')")
-    page.reload()
+    
+    # Now navigate to calculations page
+    page.goto(f"{BASE_URL}/static/calculations.html")
     
     # Wait for table to load
     page.wait_for_timeout(1000)
