@@ -119,14 +119,34 @@ class TestUserEndpoints:
 class TestCalculationEndpoints:
     """Test suite for calculation endpoints."""
     
+    def get_auth_headers(self):
+        """Helper to register, login and get auth headers."""
+        # Register user
+        user_data = {
+            "username": "testuser",
+            "email": "test@example.com",
+            "password": "securepass123"
+        }
+        client.post("/users/register", json=user_data)
+        
+        # Login
+        login_data = {
+            "username": "testuser",
+            "password": "securepass123"
+        }
+        response = client.post("/users/login", json=login_data)
+        token = response.json()["access_token"]
+        return {"Authorization": f"Bearer {token}"}
+
     def test_create_calculation(self):
         """Test creating a calculation."""
+        headers = self.get_auth_headers()
         calc_data = {
             "a": 10,
             "b": 5,
             "type": "Add"
         }
-        response = client.post("/calculations/", json=calc_data)
+        response = client.post("/calculations/", json=calc_data, headers=headers)
         assert response.status_code == 201
         data = response.json()
         assert data["result"] == 15
@@ -134,55 +154,50 @@ class TestCalculationEndpoints:
         
     def test_create_calculation_with_user(self):
         """Test creating a calculation linked to a user."""
-        # Register user
-        user_data = {
-            "username": "testuser",
-            "email": "test@example.com",
-            "password": "securepass123"
-        }
-        user_res = client.post("/users/register", json=user_data)
-        user_id = user_res.json()["id"]
+        headers = self.get_auth_headers()
         
         calc_data = {
             "a": 10,
             "b": 5,
-            "type": "Multiply",
-            "user_id": user_id
+            "type": "Multiply"
         }
-        response = client.post("/calculations/", json=calc_data)
+        response = client.post("/calculations/", json=calc_data, headers=headers)
         assert response.status_code == 201
         data = response.json()
         assert data["result"] == 50
-        assert data["user_id"] == user_id
+        assert "user_id" in data
 
     def test_read_calculations(self):
         """Test reading all calculations."""
-        client.post("/calculations/", json={"a": 1, "b": 1, "type": "Add"})
-        client.post("/calculations/", json={"a": 2, "b": 2, "type": "Add"})
+        headers = self.get_auth_headers()
+        client.post("/calculations/", json={"a": 1, "b": 1, "type": "Add"}, headers=headers)
+        client.post("/calculations/", json={"a": 2, "b": 2, "type": "Add"}, headers=headers)
         
-        response = client.get("/calculations/")
+        response = client.get("/calculations/", headers=headers)
         assert response.status_code == 200
         assert len(response.json()) == 2
         
     def test_read_calculation_by_id(self):
         """Test reading a specific calculation."""
-        res = client.post("/calculations/", json={"a": 10, "b": 2, "type": "Divide"})
+        headers = self.get_auth_headers()
+        res = client.post("/calculations/", json={"a": 10, "b": 2, "type": "Divide"}, headers=headers)
         calc_id = res.json()["id"]
         
-        response = client.get(f"/calculations/{calc_id}")
+        response = client.get(f"/calculations/{calc_id}", headers=headers)
         assert response.status_code == 200
         assert response.json()["result"] == 5
         
     def test_update_calculation(self):
         """Test updating a calculation."""
-        res = client.post("/calculations/", json={"a": 10, "b": 5, "type": "Add"})
+        headers = self.get_auth_headers()
+        res = client.post("/calculations/", json={"a": 10, "b": 5, "type": "Add"}, headers=headers)
         calc_id = res.json()["id"]
         
         # Update to Subtract
         update_data = {
             "type": "Subtract"
         }
-        response = client.put(f"/calculations/{calc_id}", json=update_data)
+        response = client.put(f"/calculations/{calc_id}", json=update_data, headers=headers)
         assert response.status_code == 200
         data = response.json()
         assert data["type"] == "Subtract"
@@ -190,22 +205,24 @@ class TestCalculationEndpoints:
         
     def test_delete_calculation(self):
         """Test deleting a calculation."""
-        res = client.post("/calculations/", json={"a": 10, "b": 5, "type": "Add"})
+        headers = self.get_auth_headers()
+        res = client.post("/calculations/", json={"a": 10, "b": 5, "type": "Add"}, headers=headers)
         calc_id = res.json()["id"]
         
-        response = client.delete(f"/calculations/{calc_id}")
+        response = client.delete(f"/calculations/{calc_id}", headers=headers)
         assert response.status_code == 204
         
         # Verify deletion
-        get_res = client.get(f"/calculations/{calc_id}")
+        get_res = client.get(f"/calculations/{calc_id}", headers=headers)
         assert get_res.status_code == 404
 
     def test_divide_by_zero(self):
         """Test division by zero error."""
+        headers = self.get_auth_headers()
         calc_data = {
             "a": 10,
             "b": 0,
             "type": "Divide"
         }
-        response = client.post("/calculations/", json=calc_data)
+        response = client.post("/calculations/", json=calc_data, headers=headers)
         assert response.status_code == 422
